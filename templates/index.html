@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='avatar.ico') }}">
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Web trực quan xử lý ảnh Y tế</title>
@@ -10,11 +9,47 @@
         body {
             font-family: Arial, sans-serif;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
             background-color: #f0f2f5;
+            
+
+        }
+       
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding: 10px 20px;
+            background-color: #b30606;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .header .logo img {
+            height: 50px;
+        }
+        .header .user-info {
+            display: flex;
+            align-items: center;
+        }
+        .header .user-info img {
+            height: 50px;
+            width: 50px;
+            border-radius: 50%;
+            margin-right: 10px;
+            object-fit: cover;
+        }
+        .header .account-details {
+            text-align: right;
+        }
+        .header .account-details a {
+            text-decoration: none;
+            color: rgb(252, 252, 252);
+        }
+        .header .account-details a:hover {
+            color: blue;
         }
         .container {
             text-align: center;
@@ -22,6 +57,7 @@
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            margin-top: 20px;
         }
         h1 {
             color: #333;
@@ -52,34 +88,50 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Web trực quan xử lý ảnh Y tế</h1>
-        <form action="/predict" method="post" enctype="multipart/form-data">
-            <input type="file" name="file" accept="image/*" required>
-            <button type="submit">Upload and Predict</button>
-        </form>
-        <div class="result" id="result"></div>
-    </div>
 
-    <script>
-        // Lắng nghe sự kiện submit form để lấy kết quả dự đoán
-        document.querySelector("form").onsubmit = async (e) => {
-            e.preventDefault();
-            
-            const formData = new FormData(e.target);
-            const response = await fetch("/predict", {
-                method: "POST",
-                body: formData,
-            });
-            
-            const resultElement = document.getElementById("result");
-            if (response.ok) {
-                const data = await response.json();
-                resultElement.textContent = `Predicted Class: ${data.predicted_class}`;
-            } else {
-                resultElement.textContent = "Error: Unable to make a prediction";
-            }
-        };
-    </script>
+<div class="header" id="header">
+    <div class="logo">
+        <a href="">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo">
+        </a>
+    </div>
+    <div class="user-info">
+        <img src="{{ url_for('static', filename='l/avatar.jpg') }}" alt="Account Icon">
+        <div class="account-details">
+            <b><a href="https://www.facebook.com/ngovantrong1308?locale=vi_VN">Ngọ Văn Trọng</a></b><br>
+            <a href="https://github.com/TrongNgoVan">B21DCCN726</a>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <h1>Web trực quan xử lý ảnh Y tế</h1>
+    <form action="/predict" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" accept="image/*" required>
+        <button type="submit">Upload and Predict</button>
+    </form>
+    <div class="result" id="result"></div>
+</div>
+
+<script>
+    document.querySelector("form").onsubmit = async (e) => {
+        e.preventDefault();
+        
+        const formData = new FormData(e.target);
+        const response = await fetch("/predict", {
+            method: "POST",
+            body: formData,
+        });
+        
+        const resultElement = document.getElementById("result");
+        if (response.ok) {
+            const data = await response.json();
+            resultElement.textContent = `Predicted Class: ${data.predicted_class}`;
+        } else {
+            resultElement.textContent = "Error: Unable to make a prediction";
+        }
+    };
+</script>
+
 </body>
 </html>
