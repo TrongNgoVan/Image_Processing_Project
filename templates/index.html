@@ -14,25 +14,29 @@
             min-height: 100vh;
             margin: 0;
             background-color: #f0f2f5;
-            
-
         }
        
         .header {
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start; /* Thay đổi từ space-between thành flex-start */
             align-items: center;
             width: 100%;
             padding: 10px 20px;
-            background-color: #b30606;
+            background-color: #b10404;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+        }
+        .header .logo {
+            margin-right: 20px; /* Thêm margin để tạo khoảng cách với user-info */
         }
         .header .logo img {
             height: 50px;
+            vertical-align: middle;
         }
         .header .user-info {
             display: flex;
             align-items: center;
+            padding-left: 20px; /* Thêm padding bên trái */
         }
         .header .user-info img {
             height: 50px;
@@ -42,14 +46,16 @@
             object-fit: cover;
         }
         .header .account-details {
-            text-align: right;
+            text-align: left; /* Đổi từ right sang left */
         }
         .header .account-details a {
             text-decoration: none;
             color: rgb(252, 252, 252);
+            display: block; /* Giúp các link xếp dọc */
+            line-height: 1.4; /* Tăng khoảng cách giữa các dòng */
         }
         .header .account-details a:hover {
-            color: blue;
+            color: #e0e0e0;
         }
         .container {
             text-align: center;
@@ -58,6 +64,8 @@
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
             margin-top: 20px;
+            width: 80%;
+            max-width: 800px;
         }
         h1 {
             color: #333;
@@ -69,7 +77,7 @@
             margin: 10px 0;
         }
         button {
-            background-color: #007bff;
+            background-color: #ca0606;
             color: white;
             padding: 10px 20px;
             border: none;
@@ -78,12 +86,18 @@
             font-size: 16px;
         }
         button:hover {
-            background-color: #0056b3;
+            background-color: #a10404;
         }
         .result {
             margin-top: 20px;
             font-size: 18px;
-            color: #28a745;
+            color: #e30606;
+        }
+        #uploaded-image {
+            margin-top: 20px;
+            max-width: 100%;
+            max-height: 400px;
+            display: none;
         }
     </style>
 </head>
@@ -98,7 +112,7 @@
     <div class="user-info">
         <img src="{{ url_for('static', filename='l/avatar.jpg') }}" alt="Account Icon">
         <div class="account-details">
-            <b><a href="https://www.facebook.com/ngovantrong1308?locale=vi_VN">Ngọ Văn Trọng</a></b><br>
+            <b><a href="https://www.facebook.com/ngovantrong1308?locale=vi_VN">Ngọ Văn Trọng</a></b>
             <a href="https://github.com/TrongNgoVan">B21DCCN726</a>
         </div>
     </div>
@@ -106,18 +120,36 @@
 
 <div class="container">
     <h1>Web trực quan xử lý ảnh Y tế</h1>
-    <form action="/predict" method="post" enctype="multipart/form-data">
-        <input type="file" name="file" accept="image/*" required>
-        <button type="submit">Upload and Predict</button>
+    <form id="upload-form" enctype="multipart/form-data">
+        <input type="file" name="file" id="file" accept="image/*" required>
+        <button type="submit">Phát hiện khối u</button>
     </form>
+    
+    <div id="image-container">
+        <img id="uploaded-image" src="" alt="Uploaded Image">
+    </div>
+    
     <div class="result" id="result"></div>
 </div>
 
 <script>
-    document.querySelector("form").onsubmit = async (e) => {
-        e.preventDefault();
+    document.getElementById('file').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const imgElement = document.getElementById('uploaded-image');
+                imgElement.style.display = 'block';
+                imgElement.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    document.getElementById('upload-form').addEventListener('submit', async function(event) {
+        event.preventDefault();
         
-        const formData = new FormData(e.target);
+        const formData = new FormData(event.target);
         const response = await fetch("/predict", {
             method: "POST",
             body: formData,
@@ -126,11 +158,11 @@
         const resultElement = document.getElementById("result");
         if (response.ok) {
             const data = await response.json();
-            resultElement.textContent = `Predicted Class: ${data.predicted_class}`;
+            resultElement.textContent = `Nhãn khối u: ${data.predicted_class}, Loại khối u: ${data.tumor_type}`;
         } else {
-            resultElement.textContent = "Error: Unable to make a prediction";
+            resultElement.textContent = "Lỗi: Không thể phát hiện";
         }
-    };
+    });
 </script>
 
 </body>
